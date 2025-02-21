@@ -74,6 +74,15 @@ func main() {
 			glog.Exitf("failed to get default credentials: %v", err)
 		}
 
+		t, err := credentials.TokenSource.Token()
+		if err != nil {
+			fmt.Printf("failed to get token: %v", err)
+			os.Exit(1)
+		} else if t.AccessToken == "" {
+			fmt.Printf("access token is empty")
+			os.Exit(1)
+		}
+
 		httpClient = oauth2.NewClient(ctx, credentials.TokenSource)
 	}
 
