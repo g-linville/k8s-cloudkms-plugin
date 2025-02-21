@@ -76,12 +76,16 @@ func main() {
 
 		t, err := credentials.TokenSource.Token()
 		if err != nil {
-			fmt.Printf("failed to get token: %v", err)
+			glog.Infof("failed to get token: %v", err)
 			os.Exit(1)
 		} else if t.AccessToken == "" {
-			fmt.Printf("access token is empty")
+			glog.Infof("access token is empty")
 			os.Exit(1)
+		} else {
+			glog.Infof("got valid token with length %d\n", len(t.AccessToken))
 		}
+
+		glog.Infof("key URI is %s\n", *keyURI)
 
 		httpClient = oauth2.NewClient(ctx, credentials.TokenSource)
 	}
