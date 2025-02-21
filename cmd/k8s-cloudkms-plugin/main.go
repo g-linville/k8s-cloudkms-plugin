@@ -32,7 +32,6 @@ import (
 	v2 "github.com/GoogleCloudPlatform/k8s-cloudkms-plugin/plugin/v2"
 	"github.com/golang/glog"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/option"
 )
@@ -69,25 +68,11 @@ func main() {
 	)
 
 	if !*integrationTest {
-		credentials, err := google.FindDefaultCredentials(ctx, cloudkms.CloudPlatformScope)
-		if err != nil {
-			glog.Exitf("failed to get default credentials: %v", err)
-		}
+		ts := oauth2.StaticTokenSource(&oauth2.Token{
+			AccessToken: os.Getenv("KMSPLUGIN_TOKEN"),
+		})
 
-		t, err := credentials.TokenSource.Token()
-		if err != nil {
-			glog.Infof("failed to get token: %v", err)
-			os.Exit(1)
-		} else if t.AccessToken == "" {
-			glog.Infof("access token is empty")
-			os.Exit(1)
-		} else {
-			glog.Infof("got valid token with length %d\n", len(t.AccessToken))
-		}
-
-		glog.Infof("key URI is %s\n", *keyURI)
-
-		httpClient = oauth2.NewClient(ctx, credentials.TokenSource)
+		httpClient = oauth2.NewClient(ctx, ts)
 	}
 
 	kms, err := cloudkms.NewService(ctx, option.WithHTTPClient(httpClient))
